@@ -1,0 +1,5 @@
+FROM python:3.11-slim
+WORKDIR /app
+RUN pip install prometheus-client
+COPY compliance_metrics.py .
+CMD ["python", "compliance_metrics.py"]

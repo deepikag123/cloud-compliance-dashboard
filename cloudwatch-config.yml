@@ -1,0 +1,42 @@
+region: ap-south-1
+
+metrics:
+  # EC2 CPU Utilization
+  - aws_namespace: AWS/EC2
+    aws_metric_name: CPUUtilization
+    aws_dimensions: [InstanceId]
+    aws_statistics: [Average, Maximum]
+    # aws_namespace: the AWS service namespace (EC2, S3, etc.)
+    # aws_metric_name: which specific metric to pull
+    # aws_dimensions: how to group/filter (by Instance ID)
+    # aws_statistics: what calculation — Average or Maximum value
+
+  # EC2 Network Traffic
+  - aws_namespace: AWS/EC2
+    aws_metric_name: NetworkIn
+    aws_dimensions: [InstanceId]
+    aws_statistics: [Sum]
+
+  - aws_namespace: AWS/EC2
+    aws_metric_name: NetworkOut
+    aws_dimensions: [InstanceId]
+    aws_statistics: [Sum]
+
+  # EC2 Status Checks — 0 = OK, 1 = Failed (critical!)
+  - aws_namespace: AWS/EC2
+    aws_metric_name: StatusCheckFailed
+    aws_dimensions: [InstanceId]
+    aws_statistics: [Maximum]
+
+  # S3 Bucket Size
+  - aws_namespace: AWS/S3
+    aws_metric_name: BucketSizeBytes
+    aws_dimensions: [BucketName, StorageType]
+    aws_statistics: [Average]
+    aws_extended_statistics: []
+
+  # S3 Number of Objects
+  - aws_namespace: AWS/S3
+    aws_metric_name: NumberOfObjects
+    aws_dimensions: [BucketName, StorageType]
+    aws_statistics: [Average]

@@ -1,0 +1,37 @@
+groups:
+  - name: compliance_alerts
+    # name: a label for this group of rules
+    rules:
+      - alert: CriticalComplianceViolation
+        # alert: name of this specific alert
+        expr: aws_non_compliant_resources_total{severity="CRITICAL"} > 0
+        # expr: the PromQL expression to evaluate
+        # This says: if critical non-compliant resources count is greater than 0
+        for: 5m
+        # for: how long this condition must be true before alert fires
+        # 5m = 5 minutes. Avoids false alarms from brief spikes.
+        labels:
+          severity: critical
+          # Labels attached to the alert for routing/filtering
+        annotations:
+          summary: "Critical AWS compliance violations detected"
+          description: "{{ $value }} CRITICAL compliance violations found. Immediate remediation required."
+          # {{ $value }} is replaced with the actual metric value
+
+      - alert: HighComplianceViolation
+        expr: aws_non_compliant_resources_total{severity="HIGH"} > 2
+        for: 10m
+        labels:
+          severity: high
+        annotations:
+          summary: "High severity compliance violations detected"
+          description: "{{ $value }} HIGH severity violations found. Review and remediate."
+
+      - alert: LowComplianceScore
+        expr: aws_compliance_score_percentage < 70
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Compliance score dropped below 70%"
+          description: "Current compliance score is {{ $value }}%. ISO 27001 requires continuous compliance."

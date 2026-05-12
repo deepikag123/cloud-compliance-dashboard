@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+
+  # Prometheus — metrics collection and storage engine
+  prometheus:
+    image: prom/prometheus:latest
+    # "image" tells Docker which pre-built software to use
+    # prom/prometheus is the official Prometheus image from Docker Hub
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+      # "9090:9090" means: expose port 9090 inside the container to port 9090 on your Windows machine
+      # So you can access Prometheus at http://localhost:9090
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      # This mounts your local prometheus.yml config file into the container
+      # Container reads YOUR config file instead of the default one
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=30d'
+      # --storage.tsdb.retention.time=30d means keep 30 days of metrics data
+    restart: unless-stopped
+    # restart: unless-stopped means if the container crashes, auto-restart it
+
+  # Grafana — visualization and dashboard tool
+  grafana:
+    image: grafana/grafana:10.2.3
+    container_name: grafana
+    ports:
+      - "3000:3000"
+      # Grafana accessible at http://localhost:3000
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=ComplianceAdmin123
+      # These set the Grafana login username and password
+    volumes:
+      - grafana-data:/var/lib/grafana
+      # Named volume to persist Grafana data even if container restarts
+    depends_on:
+      - prometheus
+      # Tells Docker to start Prometheus first, then Grafana
+    restart: unless-stopped
+
+  # CloudWatch Exporter — pulls AWS metrics and translates them for Prometheus
+  cloudwatch-exporter:
+    image: prom/cloudwatch-exporter:latest
+    container_name: cloudwatch-exporter
+    ports:
+      - "9106:9106"
+    volumes:
+      - ./cloudwatch-config.yml:/config/config.yml
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=ap-south-1
+      # These are read from your .env file (see next step)
+    restart: unless-stopped
+
+
+  compliance-metrics:
+    build:
+      context: .
+      dockerfile: Dockerfile.compliance
+    container_name: compliance-metrics
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+volumes:
+  grafana-data:
+  # Named volume definition — Docker manages this storage

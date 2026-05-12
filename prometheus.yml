@@ -1,0 +1,43 @@
+global:
+  scrape_interval: 60s
+  # scrape_interval: how often Prometheus collects data from each target
+  # 60s = every 60 seconds, it goes and fetches new metrics
+  evaluation_interval: 60s
+  # evaluation_interval: how often Prometheus checks alert rules
+
+# Alerting configuration — where to send alerts (we'll configure later)
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+# Rule files — files containing alert rules
+rule_files:
+  - "alert_rules.yml"
+
+# Scrape configurations — WHERE Prometheus goes to get metrics
+scrape_configs:
+  # Prometheus monitoring itself
+  - job_name: "prometheus"
+    # job_name is just a label for this scraping job
+    static_configs:
+      - targets: ["localhost:9090"]
+        # targets: the addresses Prometheus will call to get metrics
+
+  # CloudWatch Exporter — AWS metrics
+  - job_name: "aws-cloudwatch"
+    static_configs:
+      - targets: ["cloudwatch-exporter:9106"]
+        # cloudwatch-exporter is the container name (Docker resolves this)
+        # Port 9106 is where the exporter serves metrics
+    scrape_interval: 300s
+    # AWS CloudWatch has rate limits, so scrape every 5 minutes instead of 60s
+
+  # Our compliance script metrics (we'll expose these via a simple HTTP server)
+  - job_name: "compliance-metrics"
+    static_configs:
+      - targets: ["172.17.0.1:8000"]
+        # host.docker.internal is how a Docker container accesses your Windows host machine
+        # Port 8000 is where our Python compliance metrics server will run
+    scrape_interval: 3600s
+    # 3600s = 1 hour. Compliance scan runs once per hour.
