@@ -6,8 +6,10 @@ A real-time AWS cloud compliance monitoring system that audits security configur
 
 ## 📸 Dashboard Preview
 
+><img width="1920" height="1080" alt="Grafana Dashboard_1" src="https://github.com/user-attachments/assets/2a833860-f7d4-43fc-8d1d-85d764f6af35" />
+
 > <img width="1920" height="1080" alt="Grafana Dashboard_2" src="https://github.com/user-attachments/assets/881aaade-a1b3-4761-be56-f79270b0e96b" />
-*
+
 
 \---
 
